@@ -6,9 +6,9 @@ const bdconect = async () => {
             useNewUrlParser: true,
             useUnifiedTopology: true
         });
-        console.log("✅ Connecté à MongoDB");
+        console.log("Connecté à MongoDB");
     } catch (err) {
-        console.error("❌ Erreur MongoDB :", err);
+        console.error("Erreur MongoDB :", err);
         process.exit(1);
     }
 };
