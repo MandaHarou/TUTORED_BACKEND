@@ -1,17 +1,20 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/userModel');
 
-const authenticateToken = (req, res, next) => {
-  const token = req.headers['authorization'];
+const verifyToken = (req, res, next)=>{
+  const authHeader = req.headers.autorization;
 
-  if (!token) return res.status(403).send('Accès refusé');
+  if(!authHeader || !authHeader.startsWith('Bearer ')){
+    return res.status(403).json({message: 'Missing or incorrectly formatted token'});
+  
 
-  jwt.verify(token, process.env.JWT_SECRET, async (err, user) => {
-    if (err) return res.status(403).send('Token invalide');
-
-    req.user = await User.findById(user.id);  // Associer l'utilisateur au request
+  const token =  authHeader.split(' ')[1];
+  try{
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;
     next();
-  });
+  }catch(error){
+    return res.status(401).json({message: 'Invalid or expired token'})
+  }
+}
 };
-
-module.exports = authenticateToken;
+module.exports = verifyToken;
