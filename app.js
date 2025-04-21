@@ -1,17 +1,17 @@
-const dotenv = require('dotenv').config();
-const mongoose = require('mongoose');
+
 const cors = require('cors');
+const mongoose = require('mongoose');
 const express = require('express');
 const bdconect = require('./config/db');
-const router = 
+
 const app = express();
-const port = process.env.PORT;
+const port = process.env.PORT || 3000;
 app.use(express.json());
 app.use(cors());
 bdconect();
 
-app.use('/', require('../controler/messageControler'));
+app.use('/post', require('../communication-app/routes/userRoutes'));
 
 app.listen(port,()=>{
-  console.log("the port in action that port: ",port);
+  console.log("the port in action that port:http://localhost:3000",port);
 });

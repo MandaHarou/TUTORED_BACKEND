@@ -1,14 +1,16 @@
 const mongoose = require('mongoose');
 
-const bdconect = async()=>{
-    try{
-        mongoose.connect('mongodb://localhost:27017/communication-app',()=>{
-            console.log("conected with moggodb successfully");
+const bdconect = async () => {
+    try {
+        await mongoose.connect("mongodb://localhost:27017/communication-app", {
+            useNewUrlParser: true,
+            useUnifiedTopology: true
         });
-    }
-    catch(error){
-        console.status(500).log('internal server error');
-        process.exit();
+        console.log("Connecté à MongoDB");
+    } catch (err) {
+        console.error("Erreur MongoDB :", err);
+        process.exit(1);
     }
 };
+
 module.exports = bdconect;
