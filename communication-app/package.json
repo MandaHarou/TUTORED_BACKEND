@@ -1,0 +1,23 @@
+{
+  "name": "comunication-app",
+  "version": "1.0.0",
+  "description": "projet",
+  "main": "app.js",
+  "scripts": {
+    "test": "console.log(\"hello world\");",
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "tutoré"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "nodemon": "^3.1.9"
+  },
+  "devDependencies": {},
+  "keywords": []
+}
