@@ -6,7 +6,6 @@ module.exports.setPost = async (req, res) => {
     try {
         const { name, role, token, isConnected } = req.body;
         
-        // Validate input
         if (!name || typeof name !== 'string') {
             return res.status(400).json({ message: "Nom invalide!" });
         }
@@ -27,12 +26,7 @@ module.exports.setPost = async (req, res) => {
         res.status(201).json(newUser);
     } catch (error) {
         console.error('Erreur lors de la création d\'un utilisateur:', error);
-        if (error.name === 'ValidationError') {
-            return res.status(400).json({ 
-                error: 'Erreur de validation', 
-                details: error.message 
-            });
-        }
+       
         res.status(500).json({ 
             error: 'Erreur serveur', 
             message: 'Une erreur inattendue s\'est produite lors de la création de l\'utilisateur' 
