@@ -10,13 +10,32 @@ app.post('/message/:userId',require('/message/messagecontroler'));
 add an `user`
 
 ```js
-router.post('/useradd', require('/userdb'));
+router.post('/useradd',setPost);
 ```
-# FIndUser 
+# FindUser 
 
 find an user 
 
 ```js
-router.get('/user/userId',setGet); 
+router.get('/users',setGet); 
+```
+# Edit User 
+
+Edit an `User`
+
+```js
+router.patch('/users/:id',updateUser);
+```
+# Edit allUser
+
+Edit the `Users`
+```js
+router.put('/users/:id',setPut);
 ```
 
+# Delet an User 
+
+Delet an `User`
+```js
+router.delete('/users/:id',deletUser);
+```
