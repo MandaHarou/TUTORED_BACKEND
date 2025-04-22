@@ -1,15 +1,26 @@
 const express = require('express');
 const router = express.Router();
-const {setGet,setPost,updateUser,deletUser,setPut} = require('../controler/userControler');
-//Route for find user
-router.get('/users',setGet); 
-//Route for adduser
-router.post('/useradd',setPost);
-//Route for update user
-router.patch('/users/:id',updateUser);
-//Route for delet an user
-router.delete('/users/:id',deletUser);
-//Route for put an user
-router.put('/users/:id',setPut);
+const jwt = require('jsonwebtoken');
+const {setGet, setPost, updateUser, deletUser, setPut} = require('../controllers/userControllers');
+const isAdmin = require('../middlewares/admin');
+const verifyToken = require('../middlewares/authenticateToken');
+
+// Middleware de log global
+router.use((req, res, next) => {
+  console.log('User Routes - Incoming Request:');
+  console.log('Method:', req.method);
+  console.log('Path:', req.path);
+  console.log('Headers:', JSON.stringify(req.headers, null, 2));
+  next();
+});
+
+// Route pour récupérer un utilisateur (accessible à tous les utilisateurs connectés)
+router.get('/users/:id', verifyToken, setGet); 
+
+// Routes réservées à l'admin
+router.post('/useradd', verifyToken, isAdmin, setPost);
+router.patch('/users/:id', verifyToken, isAdmin, updateUser);
+router.put('/users/:id', verifyToken, isAdmin, setPut);
+router.delete('/users/:id', verifyToken, isAdmin, deletUser);
 
 module.exports = router;
