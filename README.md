@@ -39,3 +39,14 @@ Delet an `User`
 ```js
 router.delete('/users/:id',deletUser);
 ```
+# LOGIN 
+
+login and token
+```js
+router.post('/login', login);
+```
+
+logout 
+```js
+router.post('/logout', verifyToken, logout);
+```
