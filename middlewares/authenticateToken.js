@@ -17,12 +17,25 @@ const verifyToken = (req, res, next) => {
     });
   }
 
-  // Supporter les tokens avec ou sans préfixe "Bearer "
-  const token = authHeader.startsWith('Bearer ') 
-    ? authHeader.split(' ')[1] 
-    : authHeader;
+  // Extraire le token en ignorant les espaces supplémentaires
+  let token;
+  if (authHeader.startsWith('Bearer')) {
+    // Utiliser une expression régulière pour extraire le token après "Bearer" en ignorant les espaces
+    const tokenMatch = authHeader.match(/Bearer\s+(.+)/);
+    token = tokenMatch ? tokenMatch[1].trim() : '';
+  } else {
+    token = authHeader.trim();
+  }
 
   console.log('Extracted Token:', token);
+
+  if (!token) {
+    console.log('Token is empty after extraction');
+    return res.status(403).json({ 
+      message: 'Token vide ou mal formaté',
+      authHeader
+    });
+  }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);

@@ -214,13 +214,20 @@ module.exports.updateUserPhoto = async (req, res) => {
     try {
         const userId = req.userId;
         
-        // Si aucun fichier n'a été uploadé
-        if (!req.file) {
-            return res.status(400).json({ message: 'Aucune photo fournie' });
+        // Si un fichier a été uploadé, utiliser son chemin
+        let photoPath = '';
+        if (req.file) {
+            photoPath = `/uploads/${req.file.filename}`;
+        } 
+        // Si une URL a été fournie dans le corps de la requête
+        else if (req.body.photoUrl) {
+            photoPath = req.body.photoUrl;
+        } 
+        // Si aucune photo n'est fournie, on peut soit garder l'existante, soit mettre une valeur vide
+        else {
+            // Pas d'erreur, on continue avec une photo vide
+            photoPath = '';
         }
-        
-        // Chemin de la photo
-        const photoPath = `/uploads/${req.file.filename}`;
         
         const user = await User.findByIdAndUpdate(userId, { photo: photoPath }, { new: true });
         if (!user) {

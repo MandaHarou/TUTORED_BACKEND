@@ -3,8 +3,11 @@ const mongoose = require('mongoose');
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
+const http = require('http');
 const bdconect = require('./config/db');
 const dotenv = require('dotenv').config();
+const { initializeSocket } = require('./sockets/socketManager');
+
 /*
              Main
  */
@@ -18,6 +21,12 @@ if (!fs.existsSync(uploadDir)){
 
 const app = express();
 const port = process.env.PORT || 3000;
+
+// Création du serveur HTTP
+const server = http.createServer(app);
+
+// Initialisation de Socket.IO
+const io = initializeSocket(server);
 
 // Middleware pour parser le JSON
 app.use(express.json());
@@ -38,10 +47,11 @@ bdconect();
 // Routes
 app.use('/user', require('./routes/userRoutes'));
 app.use('/log', require('./routes/logroutes'));
+app.use('/messages', require('./routes/messageRoutes'));
 
 // Démarrage du serveur
-app.listen(port, () => {
-  console.log("the port in action that port:http://localhost:3000", port);
+server.listen(port, () => {
+  console.log(`Serveur démarré sur http://localhost:${port}`);
 });
 /*
               End

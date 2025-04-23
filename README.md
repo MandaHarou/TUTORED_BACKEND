@@ -6,12 +6,38 @@ app.use('/user', require('./routes/userRoutes'));
 //login
 app.use('/log',require('./routes/logroutes'));
 ```
-# Message 
 
-send the `message`
 
 ```js
+//message
 app.post('/message/:userId',require('/message/messagecontroler'));
+```
+
+# Message 
+
+Get conversation `User`
+```js
+router.get('/conversations', getConversations);
+```
+
+Get messages `User`
+```js
+router.get('/:userId', getMessages);
+```
+
+Send message `User`
+```js
+router.post('/', sendMessage);
+```
+
+Mark as read `User`
+```js
+router.patch('/:userId/read', markAsRead);
+```
+
+Delete message `User`
+```js
+router.delete('/:messageId', deleteMessage);
 ```
 # AddUser 
 
@@ -58,6 +84,10 @@ logout
 ```js
 router.post('/logout', verifyToken, logout);
 ```
+
+
+
+
 # The schemas BD
 
 Schema `of user`
