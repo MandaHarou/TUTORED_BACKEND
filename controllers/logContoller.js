@@ -1,24 +1,26 @@
 const User = require('../models/userModel');
 const jwt = require('jsonwebtoken');
+require('dotenv').config()
 
 module.exports.login = async (req, res) => {
-    const { name, token } = req.body;
-
-    console.log('Login Attempt - Debugging Information:');
-    console.log('Received Credentials:', { name, token });
-
-    if (!name || !token) {
-        return res.status(400).json({ error: 'Nom ou identifiant manquant !' });
-    }
-
     try {
+        console.log('==== REQUÊTE DE CONNEXION ====');
+        console.log('Données reçues:', req.body);
+         
+        const { name, token } = req.body;
+        
+        if (!name || !token) {
+            return res.status(400).json({ error: 'Nom ou identifiant manquant !' });
+        }
+
         const user = await User.findOne({ name, token });
         
-        console.log('User Found:', user);
-
         if (!user) {
+            console.log('Utilisateur non trouvé:', { name, token });
             return res.status(404).json({ error: 'Utilisateur non trouvé !' });
         }
+        
+        console.log('Utilisateur trouvé:', user);
 
         const jwtToken = jwt.sign(
             { 
@@ -28,31 +30,48 @@ module.exports.login = async (req, res) => {
             process.env.JWT_SECRET,
             { expiresIn: '24h' }
         );
-
-        console.log('Generated JWT Token:', jwtToken);
+        
+        console.log('JWT généré pour l\'utilisateur');
 
         user.isConnected = true;
         await user.save();
+        console.log('Statut de connexion mis à jour: true');
 
         res.json({ 
             message: 'Connexion réussie', 
             token: jwtToken, 
             role: user.role,
+            userId: user._id,
+            name: user.name,
             redirect: user.role === 'administrateur' ? '/admin-dashboard' : '/user-account'
         });
     } catch (error) {
-        console.error('Login Error:', error);
+        console.error('Erreur de connexion:', error);
         res.status(500).json({ error: 'Erreur de connexion', details: error.message });
     }
 };
 
 module.exports.logout = async (req, res) => {
     try {
-        const user = await User.findById(req.userId);
+        const userId = req.userId;
+        
+        if (!userId) {
+            return res.status(400).json({ error: 'ID utilisateur manquant' });
+        }
+        
+        const user = await User.findById(userId);
+        
+        if (!user) {
+            return res.status(404).json({ error: 'Utilisateur non trouvé' });
+        }
+        
         user.isConnected = false;
         await user.save();
+        console.log('Utilisateur déconnecté:', userId);
+        
         res.json({ message: 'Déconnexion réussie' });
     } catch (error) {
-        res.status(500).json({ error: 'Erreur de déconnexion' });
+        console.error('Erreur de déconnexion:', error);
+        res.status(500).json({ error: 'Erreur de déconnexion', details: error.message });
     }
 };

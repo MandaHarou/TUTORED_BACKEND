@@ -1,6 +1,8 @@
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
-
+/*
+              Main
+ */
 const verifyToken = (req, res, next) => {
   console.log('Token Verification - Debugging Information:');
   console.log('Full Request Headers:', JSON.stringify(req.headers, null, 2));
@@ -47,5 +49,7 @@ const verifyToken = (req, res, next) => {
     });
   }
 };
-
+/*
+              End
+ */
 module.exports = verifyToken;

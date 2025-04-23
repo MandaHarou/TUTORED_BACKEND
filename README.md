@@ -1,3 +1,11 @@
+# APP ROUTE
+```js
+//user
+app.use('/user', require('./routes/userRoutes'));
+
+//login
+app.use('/log',require('./routes/logroutes'));
+```
 # Message 
 
 send the `message`
@@ -50,3 +58,29 @@ logout
 ```js
 router.post('/logout', verifyToken, logout);
 ```
+# The schemas BD
+
+Schema `of user`
+
+```json
+{
+    'name' : "sting",
+    'role' : "string",
+    'token' : "string",
+    'isconected' : "boolean"
+}
+```
+Schema `of message`
+
+```json
+{
+    'titre' : "string",
+    'id'    : "string"
+}
+```
+
+Shema 
+```
+
+```
+
