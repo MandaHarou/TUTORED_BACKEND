@@ -1,4 +1,3 @@
-// authHandlers.js
 const User = require('../models/userModel');
 
 function initialize(io, socket, connectedUsers) {

@@ -1,4 +1,3 @@
-// controllers/messageController.js
 const Message = require('../models/messageModel');
 const User = require('../models/userModel');
 const mongoose = require('mongoose');

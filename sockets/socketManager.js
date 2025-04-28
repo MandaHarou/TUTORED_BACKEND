@@ -1,4 +1,3 @@
-// socketManager.js
 const socketIO = require('socket.io');
 const messageHandlers = require('./messageHandlers');
 const authHandlers = require('./authHandlers');

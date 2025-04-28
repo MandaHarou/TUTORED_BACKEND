@@ -2,58 +2,43 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-// Créer le dossier uploads s'il n'existe pas
-const uploadDir = path.join(__dirname, '../uploads');
+// Définir le dossier de stockage
+const uploadDir = path.join(__dirname, '..', 'uploads', 'users');
+
+// Créer le dossier s'il n'existe pas
 if (!fs.existsSync(uploadDir)){
     fs.mkdirSync(uploadDir, { recursive: true });
-    console.log(`Dossier créé: ${uploadDir}`);
 }
-
-console.log('Configuration du middleware d\'upload...');
-console.log('Dossier d\'upload:', uploadDir);
 
 // Configuration du stockage
 const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        console.log('Destination du fichier:', uploadDir);
-        // Vérifier que le dossier existe avant d'y écrire
-        if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir, { recursive: true });
-            console.log('Dossier créé pendant l\'upload');
-        }
+    destination: (req, file, cb) => {
         cb(null, uploadDir);
     },
-    filename: function (req, file, cb) {
-        // Nom de fichier unique
-        const uniqueFilename = `${Date.now()}-${file.originalname.replace(/\s+/g, '_')}`;
-        console.log('Nom du fichier généré:', uniqueFilename);
-        cb(null, uniqueFilename);
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
     }
 });
 
-// Configuration du filtre pour les images
+// Filtre pour les types de fichiers
 const fileFilter = (req, file, cb) => {
-    console.log('Fichier reçu:', file);
-    // Accepter uniquement les images
-    if (file.mimetype.startsWith('image/')) {
-        console.log('Type de fichier accepté:', file.mimetype);
-        cb(null, true);
+    const filetypes = /jpeg|jpg|png|gif/;
+    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = filetypes.test(file.mimetype);
+
+    if (extname && mimetype) {
+        return cb(null, true);
     } else {
-        console.log('Type de fichier rejeté:', file.mimetype);
-        cb(new Error('Seules les images sont autorisées !'), false);
+        cb('Erreur: Images uniquement!');
     }
 };
 
-// Configuration de multer
-const upload = multer({ 
+// Configuration de Multer
+const upload = multer({
     storage: storage,
     fileFilter: fileFilter,
-    limits: {
-        fileSize: 5 * 1024 * 1024 // Limite à 5MB
-    }
+    limits: { fileSize: 5 * 1024 * 1024 } // 5MB
 });
-
-// Vérifier que multer est correctement configuré
-console.log('Middleware d\'upload configuré avec succès');
 
 module.exports = upload;

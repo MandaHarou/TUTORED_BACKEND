@@ -1,4 +1,3 @@
-// messageHandlers.js
 const Message = require('../models/messageModel');
 
 function initialize(io, socket, connectedUsers) {

@@ -1,4 +1,3 @@
-// controllers/userControllers.js
 const express = require('express');
 const mongoose = require('mongoose');
 const User = require('../models/userModel');
@@ -33,105 +32,79 @@ module.exports.handlePhotoUpload = (req, res, next) => {
 };
 
 // Fonction pour créer un nouvel utilisateur
-module.exports.setPost = async (req, res) => {
+exports.setPost = async (req, res) => {
     try {
-        // Logs détaillés pour le débogage
-        console.log('==== REQUÊTE DE CRÉATION UTILISATEUR ====');
-        console.log('Content-Type:', req.headers['content-type']);
-        console.log('Body:', req.body);
-        console.log('File:', req.file);
-        
-        // Traitement du fichier photo
-        let photoPath = '';
-        
-        // Si un fichier a été uploadé
-        if (req.file) {
-            console.log('Fichier détecté:', req.file.originalname);
-            
-            // Vérifier que le fichier existe
-            if (fs.existsSync(req.file.path)) {
-                console.log('Fichier sauvegardé avec succès à:', req.file.path);
-                // Chemin relatif pour accéder à l'image via HTTP
-                photoPath = `/uploads/${path.basename(req.file.path)}`;
-                console.log('Chemin de la photo enregistré:', photoPath);
-            } else {
-                console.error('Le fichier n\'existe pas à:', req.file.path);
-            }
-        } 
-        // Si une URL a été fournie (solution alternative)
-        else if (req.body.photoUrl) {
-            if (Array.isArray(req.body.photoUrl)) {
-                photoPath = req.body.photoUrl[0];
-            } else {
-                photoPath = req.body.photoUrl;
-            }
-            console.log('URL de photo fournie:', photoPath);
-        } else {
-            console.log('Aucune photo fournie');
-        }
-        
-        const { name, role, token, email } = req.body;
-        let isConnected = req.body.isConnected || false;
-        
-        // Conversion de isConnected en booléen si c'est une chaîne
-        if (typeof isConnected === 'string') {
-            isConnected = isConnected.toLowerCase() === 'true';
-        }
-        
-        // Validation des champs
-        if (!name || typeof name !== 'string') {
-            return res.status(400).json({ message: "Nom invalide!" });
-        }
-        if (!role || typeof role !== 'string') {
-            return res.status(400).json({ message: "Rôle invalide!" });
-        }
-        if (!token || typeof token !== 'string') {
-            return res.status(400).json({ message: "Token invalide!" });
-        }
-        
-        // Vérification de l'utilisateur existant
-        const existingUser = await User.findOne({ name });
-        if (existingUser) {
-            // Supprimer le fichier si l'utilisateur existe déjà
-            if (req.file && fs.existsSync(req.file.path)) {
-                fs.unlinkSync(req.file.path);
-            }
-            return res.status(409).json({ message: "Un utilisateur avec ce nom existe déjà!" });
-        }
-        
-        // Création de l'utilisateur
-        const newUser = await User.create({
-            name,
-            email: email || '', // Email optionnel
-            role,
-            token,
-            isConnected,
-            photo: photoPath
-        });
-        
-        console.log('Utilisateur créé avec succès:', newUser);
-        
-        res.status(201).json(newUser);
+      // Récupérer les données du corps de la requête
+      const { name, email, role, token, isConnected } = req.body;
+      
+      // Conversion du statut de connexion si nécessaire
+      let finalIsConnected = false;
+      if (typeof isConnected === 'string') {
+          finalIsConnected = isConnected.toLowerCase() === 'true';
+      }
+      
+      // Validation du nom
+      if (!name) {
+        return res.status(400).json({ message: "Le nom est requis!" });
+      }
+      
+      // Validation optionnelle de la longueur minimale
+      if (name.trim().length < 2) {
+        return res.status(400).json({ message: "Le nom doit contenir au moins 2 caractères" });
+      }
+  
+      // Vérifier si un utilisateur avec ce nom existe déjà
+      const existingUser = await User.findOne({ name });
+      if (existingUser) {
+        return res.status(409).json({ message: "Un utilisateur avec ce nom existe déjà!" });
+      }
+  
+      // Gestion de la photo de profil
+      let photoPath = null;
+      if (req.file) {
+        photoPath = req.file.path; 
+        console.log('Chemin de la photo uploadée:', photoPath);
+      } else {
+        console.log('Aucune photo fournie');
+      }
+  
+      // Création de l'utilisateur
+      const newUser = await User.create({
+        name,
+        email: email || '', 
+        role,
+        token,
+        photo: photoPath || '', // Chemin de la photo ou chaîne vide
+        isConnected: finalIsConnected
+      });
+  
+      // Supprimez les informations sensibles de la réponse
+      const userResponse = newUser.toObject();
+      delete userResponse.password;
+  
+      res.status(201).json({
+        message: "Utilisateur créé avec succès",
+        user: userResponse
+      });
+  
     } catch (error) {
-        console.error('Erreur lors de la création d\'un utilisateur:', error);
-        
-        // Supprimer le fichier en cas d'erreur
-        if (req.file && fs.existsSync(req.file.path)) {
-            try {
-                fs.unlinkSync(req.file.path);
-            } catch (unlinkError) {
-                console.error('Erreur lors de la suppression du fichier:', unlinkError);
-            }
+      console.error('Erreur lors de la création de l\'utilisateur:', error);
+      
+      // Supprimer le fichier uploadé en cas d'erreur
+      if (req.file && req.file.path) {
+        try {
+          fs.unlinkSync(req.file.path);
+        } catch (unlinkError) {
+          console.error('Erreur lors de la suppression du fichier:', unlinkError);
         }
-        
-        res.status(500).json({
-            error: 'Erreur serveur',
-            message: 'Une erreur inattendue s\'est produite lors de la création de l\'utilisateur',
-            details: error.message
-        });
+      }
+  
+      res.status(500).json({ 
+        message: "Erreur lors de la création de l'utilisateur",
+        error: error.message 
+      });
     }
-};
-
+  };
 // Fonction pour récupérer tous les utilisateurs
 module.exports.setGet = async (req, res) => {
     try {

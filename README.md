@@ -2,12 +2,11 @@
 ```js
 //user
 app.use('/user', require('./routes/userRoutes'));
-
+```
+```js
 //login
 app.use('/log',require('./routes/logroutes'));
 ```
-
-
 ```js
 //message
 app.post('/message/:userId',require('/message/messagecontroler'));
