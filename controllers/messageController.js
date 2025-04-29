@@ -1,26 +1,139 @@
+const mongoose = require('mongoose');
 const Message = require('../models/messageModel');
 const User = require('../models/userModel');
-const mongoose = require('mongoose');
 
-// Obtenir la liste des conversations de l'utilisateur connecté
 exports.getConversations = async (req, res) => {
   try {
-    const userId = req.userId; // Obtenu du middleware d'authentification
+    // Conversion sécurisée de l'ID
+    const userId = req.userId || new mongoose.Types.ObjectId(req.body.id || req.query.id);
     
-    // Utiliser la méthode statique définie dans le modèle
-    const conversations = await Message.getConversations(userId);
-    
+    console.log('ID utilisateur pour les conversations:', userId);
+    console.log('Type de l\'ID:', typeof userId);
+    console.log('Est un ObjectId:', userId instanceof mongoose.Types.ObjectId);
+
+    // Récupérer tous les utilisateurs avec qui l'utilisateur a eu des interactions
+    const conversations = await Message.aggregate([
+      {
+        $match: {
+          $or: [
+            { sender: userId },
+            { recipient: userId }
+          ]
+        }
+      },
+      {
+        $group: {
+          _id: {
+            $cond: [
+              { $eq: ['$sender', userId] },
+              '$recipient',
+              '$sender'
+            ]
+          },
+          lastMessage: { $last: '$$ROOT' },
+          unreadCount: { 
+            $sum: { 
+              $cond: [
+                { $and: [
+                  { $ne: ['$recipient', userId] },
+                  { $eq: ['$isRead', false] }
+                ]},
+                1, 
+                0 
+              ]
+            } 
+          }
+        }
+      },
+      {
+        $lookup: {
+          from: 'users', // Assurez-vous que c'est le bon nom de collection
+          localField: '_id',
+          foreignField: '_id',
+          as: 'userDetails'
+        }
+      },
+      {
+        $unwind: '$userDetails'
+      },
+      {
+        $project: {
+          _id: '$_id',
+          name: '$userDetails.name',
+          photo: '$userDetails.photo',
+          lastMessage: {
+            content: '$lastMessage.content',
+            createdAt: '$lastMessage.createdAt',
+            sender: '$lastMessage.sender'
+          },
+          unreadCount: '$unreadCount'
+        }
+      },
+      {
+        $sort: { 'lastMessage.createdAt': -1 }
+      }
+    ]);
+
+    // Si aucune conversation, renvoyer une liste vide
+    if (conversations.length === 0) {
+      return res.status(200).json({
+        success: true,
+        count: 0,
+        data: []
+      });
+    }
+
     res.status(200).json({
       success: true,
       count: conversations.length,
       data: conversations
     });
+
   } catch (error) {
     console.error('Erreur lors de la récupération des conversations:', error);
     res.status(500).json({
       success: false,
       message: 'Erreur lors de la récupération des conversations',
-      error: error.message
+      error: error.toString()
+    });
+  }
+};
+
+// Nouvelle méthode pour récupérer les messages d'une conversation spécifique
+exports.getConversationMessages = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const otherUserId = new mongoose.Types.ObjectId(req.params.userId);
+
+    const messages = await Message.find({
+      $or: [
+        { sender: userId, recipient: otherUserId },
+        { sender: otherUserId, recipient: userId }
+      ]
+    }).sort({ createdAt: 1 });
+
+    // Marquer les messages comme lus
+    await Message.updateMany(
+      { 
+        sender: otherUserId, 
+        recipient: userId,
+        isRead: false 
+      },
+      { $set: { isRead: true } }
+    );
+
+    res.status(200).json({
+      success: true,
+      count: messages.length,
+      data: messages
+    });
+
+  } catch (error) {
+    console.error('Erreur lors de la récupération des messages:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erreur lors de la récupération des messages',
+      error: error.toString()
     });
   }
 };

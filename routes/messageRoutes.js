@@ -1,31 +1,27 @@
-// routes/messageRoutes.js
 const express = require('express');
 const router = express.Router();
-const {
-  getConversations,
-  getMessages,
-  sendMessage,
-  markAsRead,
-  deleteMessage
-} = require('../controllers/messageController');
-const verifyToken = require('../middlewares/authenticateToken');
+const { verifyToken } = require('../middlewares/authMiddleware');
+const messageController = require('../controllers/messageController');
 
-// Toutes les routes nécessitent une authentification
-router.use(verifyToken);
+// Vérifiez que verifyToken est bien un middleware
+router.use((req, res, next) => {
+  verifyToken(req, res, next);
+});
 
 // Obtenir toutes les conversations de l'utilisateur
-router.get('/conversations', getConversations);
+router.get('/conversations', messageController.getConversations);
+router.get('/conversation/:userId', messageController.getConversationMessages);
 
 // Obtenir les messages d'une conversation spécifique
-router.get('/:userId', getMessages);
+router.get('/:userId', messageController.getMessages);
 
 // Envoyer un nouveau message
-router.post('/', sendMessage);
+router.post('/', messageController.sendMessage);
 
 // Marquer les messages comme lus
-router.patch('/:userId/read', markAsRead);
+router.patch('/:userId/read', messageController.markAsRead);
 
 // Supprimer un message
-router.delete('/:messageId', deleteMessage);
+router.delete('/:messageId', messageController.deleteMessage);
 
 module.exports = router;

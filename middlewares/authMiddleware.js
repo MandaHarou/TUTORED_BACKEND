@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 
-module.exports = (req, res, next) => {
+const verifyToken = (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
     console.log('Auth Header:', authHeader);
@@ -19,7 +19,7 @@ module.exports = (req, res, next) => {
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
     console.log('Token décodé:', decodedToken);
 
-    const userId = decodedToken.userId;
+    const userId = decodedToken.userId || decodedToken.id;
     console.log('User ID:', userId);
     
     if (!userId) {
@@ -60,3 +60,5 @@ module.exports = (req, res, next) => {
     });
   }
 };
+
+module.exports = { verifyToken };

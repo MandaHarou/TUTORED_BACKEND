@@ -1,5 +1,3 @@
-// userStatusHandlers.js
-
 function initialize(io, socket, connectedUsers) {
   // Vous pouvez ajouter d'autres événements liés au statut utilisateur ici
 }
