@@ -19,7 +19,7 @@ exports.uploadFile = async (req, res) => {
           body: req.body
         }
       });
-    }
+    };
 
     // Vérifier que recipientId est un ObjectId valide
     const recipientId = new mongoose.Types.ObjectId(req.body.recipientId);
@@ -80,4 +80,49 @@ exports.uploadFile = async (req, res) => {
   }
 };
 
+
+
+exports.listUploadedFiles = (req, res) => {
+  const uploadsDir = path.join(__dirname, '..', 'uploads');
+  
+  fs.readdir(uploadsDir, (err, files) => {
+    if (err) {
+      return res.status(500).json({ 
+        success: false, 
+        message: 'Erreur lors de la lecture des fichiers',
+        error: err.message 
+      });
+    }
+    
+    res.status(200).json({
+      success: true,
+      files: files
+    });
+  });
+};
+
+exports.downloadFile = (req, res) => {
+  const filename = req.params.filename;
+  const filePath = path.join(__dirname, '..', 'uploads', filename);
+  
+  // Vérifier si le fichier existe
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).json({ 
+      success: false, 
+      message: 'Fichier non trouvé' 
+    });
+  }
+
+  // Télécharger le fichier
+  res.download(filePath, filename, (err) => {
+    if (err) {
+      console.error('Erreur de téléchargement:', err);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Erreur lors du téléchargement du fichier',
+        error: err.message 
+      });
+    }
+  });
+};
 // Reste du code inchangé
