@@ -9,14 +9,19 @@ app.use('/log',require('./routes/logroutes'));
 ```
 ```js
 //message
-app.post('/message/:userId',require('/message/messagecontroler'));
+app.use('/messages', require('./routes/messageRoutes'));
 ```
-
+```js
+//file
+app.use('/files', fileRoutes);
+```
 # Message 
 
 Get conversation `User`
 ```js
-router.get('/conversations', getConversations);
+router.get('/conversations', messageController.getConversations);
+//converssation specifique:
+router.get('/conversation/:userId', messageController.getConversationMessages);
 ```
 
 Get messages `User`
@@ -109,7 +114,42 @@ Schema `of message`
 ```
 
 Shema 
-```
-
+```js
+{
+  messageId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Message',
+    required: true
+  },
+  filename: {
+    type: String,
+    required: true
+  },
+  originalName: {
+    type: String,
+    required: true
+  },
+  mimetype: {
+    type: String,
+    required: true
+  },
+  size: {
+    type: Number,
+    required: true
+  },
+  path: {
+    type: String,
+    required: true
+  },
+  uploadedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
+}
 ```
 

@@ -49,7 +49,7 @@ app.use('/messages', require('./routes/messageRoutes'));
 
 
 server.listen(port, () => {
-  console.log(`Serveur démarré sur http://0.0.0.0:${port}`);
+  console.log(`Serveur démarré sur http://192.168.1.24:${port}`);
 });
 /*
               End
