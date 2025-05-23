@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { verifyToken } = require('../middlewares/authMiddleware');
-const messageController = require('../controllers/messageController');
+const messageController = require('../controllers/message.Controller');
 
 // Vérifiez que verifyToken est bien un middleware
 router.use((req, res, next) => {

@@ -12,7 +12,7 @@ const {
   updateUserPhoto,
   handlePhotoUpload,
   handleProfilePhotoUpload
-} = require('../controllers/userControllers');
+} = require('../controllers/user.Controller');
 const isAdmin = require('../middlewares/admin');
 const verifyToken = require('../middlewares/authenticateToken');
 

@@ -7,7 +7,7 @@ const http = require('http');
 const bdconect = require('./config/db');
 const dotenv = require('dotenv').config();
 const { initializeSocket } = require('./sockets/socketManager');
-const fileRoutes = require('./routes/fileRoutes');
+const fileRoutes = require('./routes/file.Routes');
 
 /*
              Main
@@ -43,9 +43,9 @@ app.use('/files', fileRoutes);
 
 
 
-app.use('/user', require('./routes/userRoutes'));
-app.use('/log', require('./routes/logroutes'));
-app.use('/messages', require('./routes/messageRoutes'));
+app.use('/user', require('./routes/user.Routes'));
+app.use('/log', require('./routes/log.routes'));
+app.use('/messages', require('./routes/message.Routes'));
 
 
 server.listen(port, () => {

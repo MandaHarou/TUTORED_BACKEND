@@ -1,4 +1,4 @@
-const File = require('../models/fileModel');
+const File = require('../models/file.models');
 const Message = require('../models/messageModel');
 const path = require('path');
 const fs = require('fs');
