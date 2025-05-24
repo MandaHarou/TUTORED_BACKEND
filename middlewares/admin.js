@@ -4,11 +4,7 @@ const isAdmin = (req, res, next) => {
   console.log('User ID:', req.userId);
   console.log('User Role:', req.userRole);
   console.log('Full User Object:', JSON.stringify(req.user, null, 2));
-/*
-              Main
- */
 
-  // Vérification avec plusieurs méthodes
   const isAdminRole = 
     req.userRole === 'administrateur' || 
     (req.user && req.user.role === 'administrateur');
@@ -29,8 +25,6 @@ const isAdmin = (req, res, next) => {
     });
   }
 };
-/*
-              End
- */
+
 
 module.exports = isAdmin;

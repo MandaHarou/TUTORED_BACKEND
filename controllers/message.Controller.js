@@ -4,14 +4,8 @@ const User = require('../models/userModel');
 
 exports.getConversations = async (req, res) => {
   try {
-    // Conversion sécurisée de l'ID
+  
     const userId = req.userId || new mongoose.Types.ObjectId(req.body.id || req.query.id);
-    
-    console.log('ID utilisateur pour les conversations:', userId);
-    console.log('Type de l\'ID:', typeof userId);
-    console.log('Est un ObjectId:', userId instanceof mongoose.Types.ObjectId);
-
-    // Récupérer tous les utilisateurs avec qui l'utilisateur a eu des interactions
     const conversations = await Message.aggregate([
       {
         $match: {
@@ -47,7 +41,7 @@ exports.getConversations = async (req, res) => {
       },
       {
         $lookup: {
-          from: 'users', // Assurez-vous que c'est le bon nom de collection
+          from: 'users', 
           localField: '_id',
           foreignField: '_id',
           as: 'userDetails'
@@ -74,7 +68,7 @@ exports.getConversations = async (req, res) => {
       }
     ]);
 
-    // Si aucune conversation, renvoyer une liste vide
+    
     if (conversations.length === 0) {
       return res.status(200).json({
         success: true,
@@ -99,7 +93,7 @@ exports.getConversations = async (req, res) => {
   }
 };
 
-// Nouvelle méthode pour récupérer les messages d'une conversation spécifique
+
 exports.getConversationMessages = async (req, res) => {
   try {
     const userId = req.userId;
@@ -112,7 +106,7 @@ exports.getConversationMessages = async (req, res) => {
       ]
     }).sort({ createdAt: 1 });
 
-    // Marquer les messages comme lus
+    
     await Message.updateMany(
       { 
         sender: otherUserId, 
@@ -138,13 +132,13 @@ exports.getConversationMessages = async (req, res) => {
   }
 };
 
-// Obtenir les messages d'une conversation spécifique
+
 exports.getMessages = async (req, res) => {
   try {
-    const userId = req.userId; // Obtenu du middleware d'authentification
+    const userId = req.userId; 
     const otherUserId = req.params.userId;
     
-    // Vérifier si l'autre utilisateur existe
+    
     const otherUser = await User.findById(otherUserId);
     if (!otherUser) {
       return res.status(404).json({
@@ -153,14 +147,14 @@ exports.getMessages = async (req, res) => {
       });
     }
     
-    // Paramètres de pagination
+   
     const limit = parseInt(req.query.limit) || 20;
     const skip = parseInt(req.query.skip) || 0;
     
-    // Récupérer les messages
+
     const messages = await Message.getMessages(userId, otherUserId, limit, skip);
     
-    // Marquer les messages comme lus
+   
     await Message.markAsRead(userId, otherUserId);
     
     res.status(200).json({
@@ -182,13 +176,13 @@ exports.getMessages = async (req, res) => {
   }
 };
 
-// Envoyer un nouveau message
+
 exports.sendMessage = async (req, res) => {
   try {
-    const senderId = req.userId; // Obtenu du middleware d'authentification
+    const senderId = req.userId; 
     const { recipientId, content } = req.body;
     
-    // Validation des données
+    
     if (!recipientId || !content) {
       return res.status(400).json({
         success: false,
@@ -196,7 +190,7 @@ exports.sendMessage = async (req, res) => {
       });
     }
     
-    // Vérifier si le destinataire existe
+   
     const recipient = await User.findById(recipientId);
     if (!recipient) {
       return res.status(404).json({
@@ -205,14 +199,14 @@ exports.sendMessage = async (req, res) => {
       });
     }
     
-    // Créer le message
+    
     const message = await Message.create({
       sender: senderId,
       recipient: recipientId,
       content
     });
     
-    // Récupérer le message avec les informations de l'expéditeur
+    
     const populatedMessage = await Message.findById(message._id)
       .populate('sender', 'name photo')
       .lean();
@@ -222,7 +216,7 @@ exports.sendMessage = async (req, res) => {
       data: populatedMessage
     });
     
-    // Note: La notification en temps réel est gérée par Socket.IO dans app.js
+    
   } catch (error) {
     console.error('Erreur lors de l\'envoi du message:', error);
     res.status(500).json({
@@ -233,10 +227,10 @@ exports.sendMessage = async (req, res) => {
   }
 };
 
-// Marquer les messages comme lus
+
 exports.markAsRead = async (req, res) => {
   try {
-    const userId = req.userId; // Obtenu du middleware d'authentification
+    const userId = req.userId; 
     const otherUserId = req.params.userId;
     
     const result = await Message.markAsRead(userId, otherUserId);
@@ -256,13 +250,13 @@ exports.markAsRead = async (req, res) => {
   }
 };
 
-// Supprimer un message
+
 exports.deleteMessage = async (req, res) => {
   try {
-    const userId = req.userId; // Obtenu du middleware d'authentification
+    const userId = req.userId; 
     const messageId = req.params.messageId;
     
-    // Vérifier si le message existe et appartient à l'utilisateur
+    
     const message = await Message.findById(messageId);
     
     if (!message) {
@@ -272,7 +266,7 @@ exports.deleteMessage = async (req, res) => {
       });
     }
     
-    // Vérifier si l'utilisateur est l'expéditeur du message
+    
     if (message.sender.toString() !== userId) {
       return res.status(403).json({
         success: false,
@@ -280,7 +274,7 @@ exports.deleteMessage = async (req, res) => {
       });
     }
     
-    // Supprimer le message
+   
     await Message.findByIdAndDelete(messageId);
     
     res.status(200).json({

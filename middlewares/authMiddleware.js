@@ -29,7 +29,7 @@ const verifyToken = (req, res, next) => {
       });
     }
 
-    // Conversion en ObjectId de manière absolument sécurisée
+    
     req.userId = new mongoose.Types.ObjectId(userId);
     console.log('User ObjectId:', req.userId);
 

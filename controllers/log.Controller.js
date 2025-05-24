@@ -64,8 +64,6 @@ module.exports.logout = async (req, res) => {
 
         user.isConnected = false;
         await user.save();
-        console.log('Utilisateur déconnecté:', userId);
-
         res.json({ message: 'Déconnexion réussie' });
     } catch (error) {
         console.error('Erreur de déconnexion:', error);

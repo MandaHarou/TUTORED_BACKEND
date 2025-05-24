@@ -6,12 +6,12 @@ const fs = require('fs');
 const upload = require('../middlewares/uploads');
 const multer = require('multer');
 
-// Middleware pour gérer l'upload de photos
+
 module.exports.handlePhotoUpload = (req, res, next) => {
   console.log('==== TRAITEMENT DE LA REQUÊTE UPLOAD ====');
   console.log('Content-Type complet:', req.headers['content-type']);
   
-  // Si la requête est multipart/form-data, utiliser multer
+  
   if (req.headers['content-type'] && req.headers['content-type'].includes('multipart/form-data')) {
     console.log('Détection de multipart/form-data, application de multer');
     upload.single('photo')(req, res, (err) => {
@@ -31,35 +31,35 @@ module.exports.handlePhotoUpload = (req, res, next) => {
   }
 };
 
-// Fonction pour créer un nouvel utilisateur
+
 exports.setPost = async (req, res) => {
     try {
-      // Récupérer les données du corps de la requête
+      
       const { name, email, role, token, isConnected } = req.body;
       
-      // Conversion du statut de connexion si nécessaire
+      
       let finalIsConnected = false;
       if (typeof isConnected === 'string') {
           finalIsConnected = isConnected.toLowerCase() === 'true';
       }
       
-      // Validation du nom
+      
       if (!name) {
         return res.status(400).json({ message: "Le nom est requis!" });
       }
       
-      // Validation optionnelle de la longueur minimale
+      
       if (name.trim().length < 2) {
         return res.status(400).json({ message: "Le nom doit contenir au moins 2 caractères" });
       }
   
-      // Vérifier si un utilisateur avec ce nom existe déjà
+     
       const existingUser = await User.findOne({ name });
       if (existingUser) {
         return res.status(409).json({ message: "Un utilisateur avec ce nom existe déjà!" });
       }
   
-      // Gestion de la photo de profil
+      
       let photoPath = null;
       if (req.file) {
         photoPath = req.file.path; 
@@ -68,17 +68,17 @@ exports.setPost = async (req, res) => {
         console.log('Aucune photo fournie');
       }
   
-      // Création de l'utilisateur
+    
       const newUser = await User.create({
         name,
         email: email || '', 
         role,
         token,
-        photo: photoPath || '', // Chemin de la photo ou chaîne vide
+        photo: photoPath || '', 
         isConnected: finalIsConnected
       });
   
-      // Supprimez les informations sensibles de la réponse
+   
       const userResponse = newUser.toObject();
       delete userResponse.password;
   
@@ -90,7 +90,7 @@ exports.setPost = async (req, res) => {
     } catch (error) {
       console.error('Erreur lors de la création de l\'utilisateur:', error);
       
-      // Supprimer le fichier uploadé en cas d'erreur
+      
       if (req.file && req.file.path) {
         try {
           fs.unlinkSync(req.file.path);
@@ -105,7 +105,7 @@ exports.setPost = async (req, res) => {
       });
     }
   };
-// Fonction pour récupérer tous les utilisateurs
+
 module.exports.setGet = async (req, res) => {
     try {
         const liste = await User.find();
@@ -115,7 +115,7 @@ module.exports.setGet = async (req, res) => {
     }
 };
 
-// Fonction pour récupérer le profil de l'utilisateur connecté
+
 module.exports.getUserProfile = async (req, res) => {
     try {
         const userId = req.userId;
@@ -125,7 +125,7 @@ module.exports.getUserProfile = async (req, res) => {
             return res.status(404).json({ message: 'Utilisateur non trouvé' });
         }
         
-        // Retourner les informations de l'utilisateur sans le token pour des raisons de sécurité
+        
         res.json({
             id: user._id,
             name: user.name,
@@ -140,13 +140,13 @@ module.exports.getUserProfile = async (req, res) => {
     }
 };
 
-// Fonction pour mettre à jour le profil de l'utilisateur connecté
+
 module.exports.updateUserProfile = async (req, res) => {
     try {
         const userId = req.userId;
         const { name, email } = req.body;
         
-        // Validation des données
+       
         const updates = {};
         if (name) updates.name = name;
         if (email) updates.email = email;
@@ -172,7 +172,7 @@ module.exports.updateUserProfile = async (req, res) => {
     }
 };
 
-// Middleware pour gérer l'upload de photo de profil
+
 module.exports.handleProfilePhotoUpload = (req, res, next) => {
   upload.single('photo')(req, res, (err) => {
     if (err) {
@@ -182,23 +182,22 @@ module.exports.handleProfilePhotoUpload = (req, res, next) => {
   });
 };
 
-// Fonction pour mettre à jour la photo de profil de l'utilisateur connecté
+
 module.exports.updateUserPhoto = async (req, res) => {
     try {
         const userId = req.userId;
         
-        // Si un fichier a été uploadé, utiliser son chemin
+        
         let photoPath = '';
         if (req.file) {
             photoPath = `/uploads/${req.file.filename}`;
         } 
-        // Si une URL a été fournie dans le corps de la requête
+        
         else if (req.body.photoUrl) {
             photoPath = req.body.photoUrl;
         } 
-        // Si aucune photo n'est fournie, on peut soit garder l'existante, soit mettre une valeur vide
         else {
-            // Pas d'erreur, on continue avec une photo vide
+            
             photoPath = '';
         }
         
@@ -217,13 +216,12 @@ module.exports.updateUserPhoto = async (req, res) => {
     }
 };
 
-// Fonction pour mettre à jour un utilisateur
+
 module.exports.updateUser = async (req, res) => {
     try {
         const { id } = req.params;
         const { name, email, role, token, isConnected } = req.body;
-        
-        // Traitement du fichier photo
+
         let photoPath = undefined;
         if (req.file) {
             photoPath = `/uploads/${path.basename(req.file.path)}`;
@@ -251,14 +249,14 @@ module.exports.updateUser = async (req, res) => {
     }
 };
 
-// Fonction pour remplacer un utilisateur
+
 module.exports.setPut = async (req, res) => {
     try {
-        // Implémentation similaire à updateUser mais avec remplacement complet
+        
         const { id } = req.params;
         const { name, email, role, token, isConnected } = req.body;
         
-        // Traitement du fichier photo
+       
         let photoPath = '';
         if (req.file) {
             photoPath = `/uploads/${path.basename(req.file.path)}`;
@@ -286,7 +284,6 @@ module.exports.setPut = async (req, res) => {
     }
 };
 
-// Fonction pour supprimer un utilisateur
 module.exports.deletUser = async (req, res) => {
     try {
         const { id } = req.params;
@@ -296,7 +293,7 @@ module.exports.deletUser = async (req, res) => {
             return res.status(404).json({ message: 'Utilisateur non trouvé' });
         }
         
-        // Si l'utilisateur avait une photo, la supprimer
+        
         if (user.photo && user.photo.startsWith('/uploads/')) {
             const photoPath = path.join(__dirname, '..', user.photo);
             if (fs.existsSync(photoPath)) {

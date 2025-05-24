@@ -2,10 +2,9 @@ const Message = require('../models/messageModel');
 
 module.exports = (io) => {
   io.on('connection', (socket) => {
-    // Authentification du socket (à implémenter)
+   
     socket.on('authenticate', (token) => {
-      // Vérifier le token et récupérer l'ID utilisateur
-      // Cette partie dépend de votre implémentation d'authentification
+      
     });
 
     socket.on('check-pending-files', async (userId) => {
@@ -24,22 +23,22 @@ module.exports = (io) => {
       }
     });
 
-    // Autres événements socket si nécessaire
+    
     module.exports = (io) => {
       io.on('connection', (socket) => {
         socket.on('authenticate', async (userId) => {
           try {
-            // Vérifier l'authentification
+            
             const user = await User.findById(userId);
             if (!user) return;
     
-            // Récupérer les messages en attente
+            
             const pendingMessages = await Message.getPendingMessages(userId);
             
-            // Émettre les messages en attente au client
+         
             socket.emit('pendingMessages', pendingMessages);
             
-            // Marquer les messages comme livrés
+           
             await Message.markMessagesAsDelivered(userId);
           } catch (error) {
             console.error('Erreur de socket:', error);
@@ -57,7 +56,7 @@ module.exports = (io) => {
             
             await message.save();
             
-            // Émettre le message au destinataire s'il est connecté
+           
             const recipientSocket = getUserSocket(messageData.recipientId);
             if (recipientSocket) {
               recipientSocket.emit('newMessage', message);

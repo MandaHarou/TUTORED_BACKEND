@@ -25,10 +25,10 @@ const messageSchema = new mongoose.Schema({
   }
 });
 
-// Index pour accélérer les requêtes de conversation
+
 messageSchema.index({ sender: 1, recipient: 1, createdAt: -1 });
 
-// Méthode statique pour récupérer les conversations d'un utilisateur
+
 messageSchema.statics.getConversations = async function(userId) {
   const conversations = await this.aggregate([
     // Trouver tous les messages où l'utilisateur est expéditeur ou destinataire
@@ -67,7 +67,7 @@ messageSchema.statics.getConversations = async function(userId) {
         }
       }
     },
-    // Joindre les informations de l'autre utilisateur
+   
     {
       $lookup: {
         from: 'users',
@@ -76,9 +76,9 @@ messageSchema.statics.getConversations = async function(userId) {
         as: 'otherUser'
       }
     },
-    // Déstructurer le tableau otherUser
+   
     { $unwind: "$otherUser" },
-    // Projeter les champs nécessaires
+    
     {
       $project: {
         _id: 1,
@@ -95,14 +95,14 @@ messageSchema.statics.getConversations = async function(userId) {
         unreadCount: 1
       }
     },
-    // Trier par date du dernier message
+
     { $sort: { "lastMessage.createdAt": -1 } }
   ]);
   
   return conversations;
 };
 
-// Méthode statique pour récupérer les messages entre deux utilisateurs
+
 messageSchema.statics.getMessages = async function(userId, otherUserId, limit = 20, skip = 0) {
   const messages = await this.find({
     $or: [
@@ -119,7 +119,7 @@ messageSchema.statics.getMessages = async function(userId, otherUserId, limit = 
   return messages.reverse();
 };
 
-// Méthode statique pour marquer les messages comme lus
+
 messageSchema.statics.markAsRead = async function(userId, otherUserId) {
   return this.updateMany(
     { sender: otherUserId, recipient: userId, read: false },

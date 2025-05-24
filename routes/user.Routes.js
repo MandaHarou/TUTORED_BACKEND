@@ -16,9 +16,7 @@ const {
 const isAdmin = require('../middlewares/admin');
 const verifyToken = require('../middlewares/authenticateToken');
 
-/*
-              Main
- */
+
 
 
 router.use((req, res, next) => {
@@ -29,14 +27,14 @@ router.use((req, res, next) => {
   next();
 });
 
-// (gestion de tous les utilisateurs)
+
 router.get('/users', verifyToken, isAdmin, setGet);
 router.post('/useradd', verifyToken, isAdmin, handlePhotoUpload, setPost);
 router.patch('/users/:id', verifyToken, isAdmin, handlePhotoUpload, updateUser);
 router.put('/users/:id', verifyToken, isAdmin, handlePhotoUpload, setPut);
 router.delete('/users/:id', verifyToken, isAdmin, deletUser);
 
-// (gestion de leur propre profil)
+
 router.get('/profile', verifyToken, getUserProfile);
 router.patch('/profile', verifyToken, updateUserProfile);
 router.patch('/profile/photo', verifyToken, handleProfilePhotoUpload, updateUserPhoto);

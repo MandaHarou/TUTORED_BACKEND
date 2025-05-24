@@ -1,7 +1,5 @@
 const mongoose = require('mongoose');
-/*
-              Main
- */
+
 const reportSchema = new mongoose.Schema({
   senderId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   content: { type: String, required: true },
@@ -10,7 +8,5 @@ const reportSchema = new mongoose.Schema({
 });
 
 const Report = mongoose.model('Report', reportSchema);
-/*
-              End
- */
+
 module.exports = Report;

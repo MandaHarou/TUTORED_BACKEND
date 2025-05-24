@@ -1,8 +1,5 @@
 const jwt = require('jsonwebtoken');
-require('dotenv').config();
-/*
-              Main
- */
+
 const verifyToken = (req, res, next) => {
   console.log('Token Verification - Debugging Information:');
   console.log('Full Request Headers:', JSON.stringify(req.headers, null, 2));
@@ -17,10 +14,10 @@ const verifyToken = (req, res, next) => {
     });
   }
 
-  // Extraire le token en ignorant les espaces supplémentaires
+  
   let token;
   if (authHeader.startsWith('Bearer')) {
-    // Utiliser une expression régulière pour extraire le token après "Bearer" en ignorant les espaces
+    
     const tokenMatch = authHeader.match(/Bearer\s+(.+)/);
     token = tokenMatch ? tokenMatch[1].trim() : '';
   } else {
@@ -42,7 +39,6 @@ const verifyToken = (req, res, next) => {
     
     console.log('Decoded Token:', JSON.stringify(decoded, null, 2));
     
-    // Ajout explicite des propriétés à l'objet de requête
     req.user = decoded;
     req.userId = decoded.id;
     req.userRole = decoded.role;
@@ -62,7 +58,5 @@ const verifyToken = (req, res, next) => {
     });
   }
 };
-/*
-              End
- */
+
 module.exports = verifyToken;
